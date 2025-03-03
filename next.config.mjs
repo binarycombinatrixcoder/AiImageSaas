@@ -14,6 +14,9 @@ const nextConfig = {
     config.externals = [...config.externals, "canvas", "jsdom"];
     return config;
   },
+  experimental: {
+    runtime: "nodejs", // Force Node.js runtime instead of Edge
+  },
 };
 
 export default nextConfig;
