@@ -8,12 +8,60 @@ import Image from "../database/models/image.model";
 import { redirect } from "next/navigation";
 
 import { v2 as cloudinary } from 'cloudinary'
+import { writeFile } from 'fs/promises';
+import path from 'path';
 
 const populateUser = (query: any) => query.populate({
   path: 'author',
   model: User,
   select: '_id firstName lastName clerkId'
 })
+
+// ADD IMAGE FROM URL
+export async function addImageFromUrl({ image, userId, path: imagepath }: AddImageParams) {
+  try {
+    await connectToDatabase();
+
+    const author = await User.findById(userId);
+
+    if (!author) {
+      throw new Error("User not found");
+    }
+
+    // Upload image to Cloudinary
+    cloudinary.config({
+      cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+      secure: true,
+    });
+
+    if (image.base64) {
+      // Upload the Base64 string to Cloudinary
+      const uploadResponse = await cloudinary.uploader.upload(image.base64, {
+        folder: 'imaginify', // You can adjust the folder as needed
+      });
+
+      const newImage = await Image.create({
+        ...image,
+        author: author._id,
+        url: uploadResponse.secure_url, // Store the Cloudinary URL
+        publicId: uploadResponse.public_id, // Store the Cloudinary public ID
+        secureURL: uploadResponse.secure_url, // Ensure secureURL is set
+      });
+
+      revalidatePath(imagepath);
+
+      return JSON.parse(JSON.stringify(newImage));
+    } else {
+      throw new Error("Image base64 is undefined");
+    }
+
+  } catch (error) {
+    handleError(error);
+  }
+}
+
 
 // ADD IMAGE
 export async function addImage({ image, userId, path }: AddImageParams) {

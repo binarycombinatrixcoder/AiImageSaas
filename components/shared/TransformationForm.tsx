@@ -1,5 +1,5 @@
 "use client"
- 
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -34,13 +34,16 @@ import { getCldImageUrl } from "next-cloudinary"
 import { addImage, updateImage } from "@/lib/actions/image.actions"
 import { useRouter } from "next/navigation"
 import { InsufficientCreditsModal } from "./InsufficientCreditsModal"
- 
+import { HeartIcon } from "lucide-react"
+
 export const formSchema = z.object({
   title: z.string(),
   aspectRatio: z.string().optional(),
   color: z.string().optional(),
   prompt: z.string().optional(),
   publicId: z.string(),
+  width: z.string().optional(),
+  height: z.string().optional(),
 })
 
 const TransformationForm = ({ action, data = null, userId, type, creditBalance, config = null }: TransformationFormProps) => {
@@ -66,7 +69,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
     resolver: zodResolver(formSchema),
     defaultValues: initialValues,
   })
- 
+
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
@@ -155,15 +158,16 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
         ...prevState,
         [type]: {
           ...prevState?.[type],
-          [fieldName === 'prompt' ? 'prompt' : 'to' ]: value 
+          [fieldName === 'prompt' ? 'prompt' : 'to' ]: value
         }
       }))
     }, 1000)();
-      
+
     return onChangeField(value)
   }
 
   const onTransformHandler = async () => {
+    debugger;
     setIsTransforming(true)
 
     setTransformationConfig(
@@ -187,7 +191,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {creditBalance < Math.abs(creditFee) && <InsufficientCreditsModal />}
-        <CustomField 
+        <CustomField
           control={form.control}
           name="title"
           formLabel="Image Title"
@@ -217,13 +221,13 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
                   ))}
                 </SelectContent>
               </Select>
-            )}  
+            )}
           />
         )}
 
         {(type === 'remove' || type === 'recolor') && (
           <div className="prompt-field">
-            <CustomField 
+            <CustomField
               control={form.control}
               name="prompt"
               formLabel={
@@ -231,7 +235,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
               }
               className="w-full"
               render={({ field }) => (
-                <Input 
+                <Input
                   value={field.value}
                   className="input-field"
                   onChange={(e) => onInputChangeHandler(
@@ -245,13 +249,13 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
             />
 
             {type === 'recolor' && (
-              <CustomField 
+              <CustomField
                 control={form.control}
                 name="color"
                 formLabel="Replacement Color"
                 className="w-full"
                 render={({ field }) => (
-                  <Input 
+                  <Input
                     value={field.value}
                     className="input-field"
                     onChange={(e) => onInputChangeHandler(
@@ -268,12 +272,12 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
         )}
 
         <div className="media-uploader-field">
-          <CustomField 
+          <CustomField
             control={form.control}
             name="publicId"
             className="flex size-full flex-col"
             render={({ field }) => (
-              <MediaUploader 
+              <MediaUploader
                 onValueChange={field.onChange}
                 setImage={setImage}
                 publicId={field.value}
@@ -283,7 +287,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
             )}
           />
 
-          <TransformedImage 
+          <TransformedImage
             image={image}
             type={type}
             title={form.getValues().title}
@@ -294,7 +298,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
         </div>
 
         <div className="flex flex-col gap-4">
-          <Button 
+          <Button
             type="button"
             className="submit-button capitalize"
             disabled={isTransforming || newTransformation === null}
@@ -302,7 +306,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
           >
             {isTransforming ? 'Transforming...' : 'Apply Transformation'}
           </Button>
-          <Button 
+          <Button
             type="submit"
             className="submit-button capitalize"
             disabled={isSubmitting}
