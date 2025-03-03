@@ -22,6 +22,11 @@ const ImageDetailsClient: React.FC<ImageDetailsClientProps> = ({ initialImage })
     setIsOpen(false)
   }, [setIsOpen])
 
+  const { userId } = React.useMemo(() => {
+    // Use useMemo to avoid re-rendering on every change
+    return { userId: image.author?.clerkId || null }
+  }, [image.author?.clerkId])
+  
   const onImageUpdatedHandler = (updatedImage: any) => {
     // Handler to update image state
     setImage(updatedImage)
@@ -31,10 +36,7 @@ const ImageDetailsClient: React.FC<ImageDetailsClientProps> = ({ initialImage })
     return <div>Loading image details...</div> // Or handle loading state appropriately
   }
 
-  const { userId } = React.useMemo(() => {
-    // Use useMemo to avoid re-rendering on every change
-    return { userId: image.author?.clerkId || null }
-  }, [image.author?.clerkId])
+  
   console.log('image obj', image)
   return (
     <>
