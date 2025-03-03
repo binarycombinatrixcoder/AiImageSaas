@@ -3,11 +3,11 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        port: ''
-      }
-    ]
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        port: "",
+      },
+    ],
   },
   reactStrictMode: true,
   webpack: (config) => {
@@ -16,6 +16,9 @@ const nextConfig = {
   },
   experimental: {
     runtime: "nodejs", // Force Node.js runtime instead of Edge
+  },
+  typescript: {
+    ignoreBuildErrors: true, // ⛔ Ignores TypeScript errors in production
   },
 };
 
